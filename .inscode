@@ -1,0 +1,1 @@
+run = "echo 'TP842N-V3 打印服务器固件项目已就绪' && echo '使用说明:' && echo '1. 本地编译: ./build.sh' && echo '2. GitHub Actions: 推送代码自动触发' && echo '3. 查看文档: docs/BUILD_GUIDE.md' && echo '4. 用户指南: docs/USER_GUIDE.md' && ls -la output/ 2

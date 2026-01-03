@@ -169,4 +169,158 @@ EOF
 
 # Web 界面刷写模式
 flash_web() {
-   
+    local ip="$1"
+    local firmware="$2"
+    
+    echo "尝试 Web 界面刷写..."
+    
+    # 检查是否支持 Web 刷写
+    if ! curl -s "http://$ip/cgi-bin/luci/admin/system/flashops" >/dev/null 2>&1; then
+        echo -e "${YELLOW}⚠️  Web 界面刷写不可用，尝试 TFTP 模式${NC}"
+        flash_tftp "$ip" "$firmware"
+        return
+    fi
+    
+    echo "请手动通过 Web 界面刷写:"
+    echo "1. 访问 http://$ip"
+    echo "2. 登录 (admin/thdn12345678)"
+    echo "3. 进入 系统 -> 备份/升级"
+    echo "4. 选择固件文件并刷写"
+    echo ""
+    read -p "完成后按回车键继续..."
+}
+
+# 自动刷写模式
+flash_auto() {
+    local ip="$1"
+    local firmware="$2"
+    
+    echo "尝试自动刷写..."
+    
+    # 尝试通过 sysupgrade 命令
+    if command -v sshpass >/dev/null 2>&1; then
+        echo "尝试 SSH 自动刷写..."
+        
+        # 上传固件文件
+        echo "上传固件文件..."
+        sshpass -p 'thdn12345678' scp -o StrictHostKeyChecking=no \
+            "$firmware" admin@$ip:/tmp/firmware.bin
+        
+        # 执行刷写命令
+        echo "执行刷写命令..."
+        sshpass -p 'thdn12345678' ssh -o StrictHostKeyChecking=no admin@$ip \
+            "sysupgrade -F /tmp/firmware.bin" &
+        
+        echo -e "${GREEN}✅ 自动刷写已启动${NC}"
+        echo "等待路由器重启（约2-3分钟）..."
+        
+        # 等待重启
+        sleep 120
+        
+        # 检查是否重启成功
+        for i in {1..30}; do
+            if ping -c 1 -W 2 "$ip" >/dev/null 2>&1; then
+                echo -e "${GREEN}✅ 路由器重启成功${NC}"
+                break
+            fi
+            echo -n "."
+            sleep 5
+        done
+        
+        return
+    fi
+    
+    # 如果 SSH 不可用，使用 Web 模式
+    flash_web "$ip" "$firmware"
+}
+
+# 验证刷写结果
+verify_flash() {
+    local ip="$1"
+    echo "验证刷写结果..."
+    
+    # 等待路由器完全启动
+    echo "等待路由器启动..."
+    for i in {1..60}; do
+        if ping -c 1 -W 2 "$ip" >/dev/null 2>&1; then
+            echo -e "${GREEN}✅ 路由器响应正常${NC}"
+            break
+        fi
+        echo -n "."
+        sleep 5
+    done
+    
+    # 检查新固件版本
+    if curl -s "http://$ip/cgi-bin/luci/admin/status/overview" >/dev/null 2>&1; then
+        echo -e "${GREEN}✅ Web 界面正常${NC}"
+        echo "请访问 http://$ip 确认新固件"
+    else
+        echo -e "${YELLOW}⚠️  无法访问 Web 界面，请手动检查${NC}"
+    fi
+}
+
+# 主函数
+main() {
+    local ip="$ROUTER_IP"
+    local firmware=""
+    local backup=false
+    local force=false
+    
+    # 解析参数
+    while getopts "i:bfh" opt; do
+        case $opt in
+            i) ip="$OPTARG" ;;
+            b) backup=true ;;
+            f) force=true ;;
+            h) show_help; exit 0 ;;
+            *) show_help; exit 1 ;;
+        esac
+    done
+    
+    shift $((OPTIND-1))
+    firmware="$1"
+    
+    if [ -z "$firmware" ]; then
+        echo -e "${RED}错误: 请指定固件文件${NC}"
+        show_help
+        exit 1
+    fi
+    
+    # 检查依赖
+    check_dependencies
+    
+    # 检查固件
+    check_firmware "$firmware"
+    
+    # 检查路由器连接
+    check_router "$ip"
+    
+    # 备份配置
+    if [ "$backup" = true ]; then
+        backup_config "$ip"
+    fi
+    
+    echo -e "${YELLOW}警告: 刷写固件有风险，请确保电源稳定${NC}"
+    read -p "是否继续刷写? (y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "刷写已取消"
+        exit 0
+    fi
+    
+    # 执行刷写
+    if [ "$force" = true ]; then
+        flash_auto "$ip" "$firmware"
+    else
+        flash_web "$ip" "$firmware"
+    fi
+    
+    # 验证结果
+    verify_flash "$ip"
+    
+    echo -e "${GREEN}=== 刷写完成 ===${NC}"
+    echo "新固件默认配置:"
+    echo "  IP地址: 192.168.10.1"
+    echo "  用户名: admin"
+    echo "  密码: thdn12345678"
+    echo "  WiFi SSID: THDN
