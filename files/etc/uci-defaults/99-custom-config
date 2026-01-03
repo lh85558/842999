@@ -1,0 +1,40 @@
+#!/bin/sh
+# 自定义默认配置脚本
+
+# 设置主机名
+uci set system.@system[0].hostname='THDN-PrintServer'
+uci commit system
+
+# 设置时区为北京时间
+uci set system.@system[0].timezone='CST-8'
+uci set system.@system[0].zonename='Asia/Shanghai'
+uci commit system
+
+# 设置 LAN IP 为 192.168.10.1
+uci set network.lan.ipaddr='192.168.10.1'
+uci commit network
+
+# 设置 WiFi SSID 和密码
+uci set wireless.default_radio0.ssid='THDN-dayin'
+uci set wireless.default_radio0.key='thdn12345678'
+uci set wireless.default_radio0.encryption='psk2'
+uci commit wireless
+
+# 设置管理员密码 (thdn12345678)
+echo 'admin:$1$thdn1234$VGRvr5K1QKZvKJvlG9J1s0:18775:0:99999:7:::' > /etc/shadow
+
+# 启用 CUPS 服务
+/etc/init.d/cups-setup enable
+/etc/init.d/cups-setup start
+
+# 启用定时重启
+/etc/init.d/cron enable
+/etc/init.d/cron start
+
+# 设置 CUPS 开机启动
+/etc/init.d/cupsd enable 2>/dev/null || true
+
+# 应用网络配置
+/etc/init.d/network restart
+
+exit 0

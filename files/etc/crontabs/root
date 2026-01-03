@@ -1,0 +1,8 @@
+# 定时重启 - 每周日凌晨3点重启
+0 3 * * 0 /sbin/reboot
+
+# 清理日志 - 每天凌晨4点清理
+0 4 * * * /usr/sbin/logrotate /etc/logrotate.conf
+
+# 更新打印机状态 - 每小时检查一次
+0 * * * * /usr/lib/cups/backend/usb

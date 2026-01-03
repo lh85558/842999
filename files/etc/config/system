@@ -1,0 +1,19 @@
+config system
+	option hostname 'THDN-PrintServer'
+	option timezone 'CST-8'
+	option ttylogin '0'
+	option log_size '64'
+	option urandom_seed '0'
+
+config timeserver 'ntp'
+	option enabled '1'
+	option enable_server '0'
+	list server 'ntp.aliyun.com'
+	list server 'cn.pool.ntp.org'
+	list server 'time1.cloud.tencent.com'
+	list server 'time.ustc.edu.cn'
+
+config led 'led_wlan'
+	option name 'WLAN'
+	option sysfs 'tp-link:green:wlan'
+	option trigger 'phy0tpt'
