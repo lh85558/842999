@@ -49,8 +49,9 @@ install_base_tools() {
         libncurses5-dev \
         libncursesw5-dev \
         libssl-dev \
-        python \
-        python2.7-dev \
+        2to3 \
+        python2 \
+        python-is-python3 \
         python3 \
         unzip \
         wget \
