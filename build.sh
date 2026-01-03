@@ -67,13 +67,13 @@ echo -e "${GREEN}开始编译固件...${NC}"
 make -j$(nproc) download world
 
 # 检查编译结果
-if [ -f "bin/targets/ar71xx/generic/openwrt-ar71xx-generic-tl-wr842n-v3-squashfs-factory.bin" ]; then
+if [ -f "bin/targets/ath79/generic/openwrt-ath97-generic-tl-wr842n-v3-squashfs-factory.bin" ]; then
     echo -e "${GREEN}编译成功！${NC}"
     echo -e "${GREEN}固件位置: bin/targets/ar71xx/generic/${NC}"
     
     # 复制固件到项目目录
     mkdir -p "$OLDPWD/output"
-    cp bin/targets/ar71xx/generic/*842n-v3* "$OLDPWD/output/"
+    cp bin/targets/ath79/generic/*842n-v3* "$OLDPWD/output/"
     
     echo -e "${GREEN}固件已复制到 output/ 目录${NC}"
 else
