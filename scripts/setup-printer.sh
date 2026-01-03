@@ -28,7 +28,7 @@ install_hp_driver() {
     if [ ! -f "/etc/cups/ppd/HP-LaserJet-1020.ppd" ]; then
         echo "下载 HP 1020 PPD 文件..."
         wget -O /etc/cups/ppd/HP-LaserJet-1020.ppd \
-            "https://raw.githubusercontent.com/OpenPrinting/cups-filters/master/ppd/HP/HP-LaserJet_1020.ppd" \
+            "https://github.com/koenkooi/foo2zjs/blob/master/PPD/HP-LaserJet_1020.ppd" \
             || echo "⚠️  PPD 文件下载失败，使用默认配置"
     fi
     
