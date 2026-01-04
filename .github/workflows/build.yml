@@ -102,7 +102,9 @@ jobs:
     - name: 编译固件
       run: |
         cd $HOME/openwrt-build/openwrt
-        make -j$(nproc) || make -j1 V=s
+        make clean
+        make -j$(nproc) || make -j1 V=sc world
+        
         
     - name: 检查编译结果
       run: |
