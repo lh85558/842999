@@ -23,9 +23,10 @@ jobs:
     - name: 设置构建环境
       run: |
         sudo apt-get update
+        sudo apt upgrade
         sudo apt-get install -y \
           build-essential ccache ecj fastjar file g++ gawk \
-          gettext git java-propose-classname libelf-dev \
+          gettext git java-propose-classnames libelf-dev \
           libncurses5-dev libncursesw5-dev libssl-dev \
           2to3 python2 python-is-python3 python3 unzip wget \
           python3-distutils python3-setuptools python3-dev \
