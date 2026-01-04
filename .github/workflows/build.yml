@@ -68,7 +68,7 @@ jobs:
     - name: 克隆 OpenWrt 源码
       run: |
         cd $HOME/openwrt-build
-        git clone https://github.com/openwrt/openwrt.git
+        git clone https://github.com/lh85558/openwrt.git
         cd openwrt
         git checkout v23.05.3
         
